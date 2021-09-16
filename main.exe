@@ -1,0 +1,78 @@
+#include <fstream>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Answer//保存结果
+{
+public:
+	int m;//词号
+	int h;//行号
+	int head;//定位
+	int end;//定位
+}K[4000];
+
+string M[200], H[2000];//分别存放敏感词，检测行
+int lm, lh, lk;
+int i, j, k;
+
+int main()
+{
+	fstream file1, file2, file3;
+	string dz, str;
+	system("chcp 65001");//设置utf-8编码
+	int a,b,h;
+	i = j = k = 0;
+	lm = lh = lk = 0;
+
+	
+	cin >> dz;
+	file1.open(dz);
+	while (getline(file1, M[i++])) lm++;//读入敏感词文本
+	lm = i;
+	file1.close();
+
+	cin >> dz;
+	file2.open(dz);
+	while (getline(file2, H[j++])) lh++;//读入检测文本
+	file2.close();
+
+	for (j = 0; j < lh; j++)//对行遍历
+	{
+		for (i = 0; i < lm; i++)//对关键字遍历
+		{
+			a = 0;
+			b = 0;
+			if (M[i][0] < 0)
+			{
+				for (; b < H[j].length() ; b++) if (H[j][b] == M[i][a] && H[j][b+1] == M[i][a+1] && H[j][b+2] == M[i][a+2])
+				{
+					if (a == 0) h = b;
+					a += 3;
+					b += 2;
+					if (a == M[i].length())
+					{
+						a = 0;
+						//将找到的答案存下来
+						K[lk].m = i;
+						K[lk].h = j;
+						K[lk].head = h;
+						K[lk++].end = j;
+					}
+				}
+			}
+		}
+	}
+
+	cin >> dz;
+	file3.open(dz);
+	file3 << "Total: " << lk << endl;
+	for (i = 0; i < lk; i++)
+	{
+		file3 << "Line" << K[i].h + 1 << ": " << '<' << M[K[i].m] << "> ";
+		for (j = K[i].head; j <= K[i].end; j++) file3.put(H[K[i].h][j]);
+		file3 << endl;
+	}
+	file3.close();
+}
